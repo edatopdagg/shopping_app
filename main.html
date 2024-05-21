@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ÇiçekKutusu Destkop App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="welcome">
+      <span style="color: rgb(0, 0, 0);">W</span>
+      <span style="color: rgb(0, 0, 0);">e</span>
+      <span style="color: rgb(0, 0, 0);">l</span>
+      <span style="color: rgb(0, 0, 0);">c</span>
+      <span style="color: rgb(0, 0, 0);">o</span>
+      <span style="color: rgb(0, 0, 0);">m</span>
+      <span style="color: rgb(0, 0, 0);">e</span>
+      &nbsp
+      <span style="color: rgb(0, 0, 0);">t</span>
+      <span style="color: rgb(0, 0, 0);">o</span>
+      &nbsp
+      <span style="color: blue;">Ç</span>
+      <span style="color: indigo;">i</span>
+      <span style="color: violet;">ç</span>
+      <span style="color: red;">e</span>
+      <span style="color: orange;">k</span>
+      <span style="color: yellow;">K</span>
+      <span style="color: green;">u</span>
+      <span style="color: blue;">t</span>
+      <span style="color: indigo;">u</span>
+      <span style="color: violet;">s</span>
+      <span style="color: red;">u</span>
+    </div>
+  <div class="categories">
+    <a href="tulips.html">
+      <div class="category tulips">
+        <h2>Beautiful Tulips</h2>
+        <img src="tulips_img/beautifulTulips.png" alt="Beautiful Tulips" id="tulips">
+      </div>
+    </a>
+    <a href="birthday.html">
+      <div class="category gifts">
+        <h2>Birthday Gifts</h2>
+        <img src="bdGift_img/birthdayGifts.jpg" alt="Birthday Gifts" id="bd">
+      </div>
+    </a>
+    <a href="room.html">
+      <div class="category room">
+        <h2>Room Flowers</h2>
+        <img src="room_flowers_img/roomFlowers.jpg" alt="Room Flowers" id="room">
+      </div>
+    </a>
+    <a href="bouquets.html">
+      <div class="category bouquets">
+        <h2>Wedding Bouquets</h2>
+        <img src="bouquets_img/weddingBouqets.jpg" alt="Wedding Bouquets" id="wb">
+      </div>
+    </a>
+  </div>
+  <div class="shopping-cart">
+    <img src="alisverisSepeti.svg" alt="Shopping Cart" style="width: 45px; height: 45px;">
+  </div>
+  <script>
+     
+    // Electron'un ipcRenderer modülünü kullanarak ana işlem ile iletişim kuruyoruz. 
+    const { ipcRenderer } = require('electron');
+
+    // Sayfa yüklendiğinde belirli öğelere tıklama olayları ekliyoruz.
+    document.addEventListener('DOMContentLoaded', () => {
+      let deneme = document.querySelector("#room");
+      deneme.addEventListener("click", () => {
+         ipcRenderer.send("room", "room_flowers");
+      });
+    });
+
+      document.addEventListener('DOMContentLoaded', () => {
+      let deneme = document.querySelector("#wb");
+      deneme.addEventListener("click", () => {
+         ipcRenderer.send("wb", "wedding_bouquets");
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let deneme = document.querySelector("#bd");
+      deneme.addEventListener("click", () => {
+         ipcRenderer.send("bd", "birthday_gifts");
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let deneme = document.querySelector("#tulips");
+      deneme.addEventListener("click", () => {
+         ipcRenderer.send("tulips", "beautiful_tulips");
+      });
+    });
+       // Burada alışveriş sepeti ikonuna tıklanıldığında 'open-cart' mesajını gönderiyoruz.
+      document.querySelector('.shopping-cart').addEventListener('click', () => {
+        ipcRenderer.send('open-cart');
+      });
+  </script>
+</body>
+</html>

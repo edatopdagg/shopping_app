@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday Gifts</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: bisque;
+    }
+
+    .birthday-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .birthday-item {
+      position: relative;
+      width: 45%;
+      margin-bottom: 20px;
+    }
+
+    .birthday-image {
+      width: 100%;
+      height: 100%;
+    }
+    .btn-custom {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+n    <div class="birthday-container">
+      <div class="birthday-item">
+        <img src="bdGift_img/birthdayGift1.jpg" alt="Birthday Gift 1" class="birthday-image">
+        <button class="btn btn-primary btn-custom" data-id="2.1" data-name="Birthday Gift 1" data-price="50">$50</button>
+      </div>
+      <div class="birthday-item">
+        <img src="bdGift_img/birthdayGift2.jpg" alt="Birthday Gift 2" class="birthday-image">
+        <button class="btn btn-primary btn-custom" data-id="2.2" data-name="Birthday Gift 2" data-price="30">$30</button>
+      </div>
+      <div class="birthday-item">
+        <img src="bdGift_img/birthdayGifts3.jpg" alt="Birthday Gift 3" class="birthday-image">
+        <button class="btn btn-primary btn-custom" data-id="2.3" data-name="Birthday Gift 3" data-price="10">$10</button>
+      </div>
+      <div class="birthday-item">
+        <img src="bdGift_img/birthdayGifts4.webp" alt="Birthday Gift 4" class="birthday-image">
+        <button class="btn btn-primary btn-custom" data-id="2.4" data-name="Birthday Gift 4" data-price="75">$75</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <!-- jQuery kütüphanesini dahil ettik -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+  <!-- Popper.js kütüphanesini dahil ettik-->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Bootstrap JavaScript kütüphanesini dahil ettik -->
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    /*Burada electron'un ipcRenderer modülü tanımlandı.*/
+
+    document.querySelectorAll(".btn-custom").forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const price = button.getAttribute('data-price');
+        /*Butonlara veri özellikleri ekledik*/
+        ipcRenderer.send('add-to-cart', { id, name, price });
+        /*Elektron üzerinden add to cart özelliklerini gönderdik */
+      });
+    });
+  </script>
+</body>
+</html>

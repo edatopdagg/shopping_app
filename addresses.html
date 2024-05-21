@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Addresses</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background-color: bisque;
+    }
+    #address-list {
+      margin-top: 20px;
+    }
+    .address-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 2px solid #4CAF50; 
+      border-radius: 8px; 
+      box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1); 
+      background-color: #f9f9f9; 
+      width: 95%;
+    }
+    .address-text {
+      font-size: 16px;
+      color: #333;
+    }
+    .delete-button {
+      background-color: #f44336; 
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .delete-button:hover {
+      background-color: #d32f2f;
+    }
+    #add-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #add-button:hover {
+      background-color: #45a049;
+    }  
+  </style>
+</head>
+<body>
+  <h1>Addresses</h1>
+  <input type="text" id="address-input" placeholder="write a new address">
+  <select id="address-type">
+    <option value="home">Home Address</option>
+    <option value="work">Work Address</option>
+  </select>
+  <button id="add-button">Add</button>
+  
+  <div id="address-list"></div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    // Electron'un ipcRenderer modülünü tanımladık.
+
+    const addressInput = document.getElementById('address-input');
+    const addressType = document.getElementById('address-type');
+    const addButton = document.getElementById('add-button');
+    const addressList = document.getElementById('address-list');
+    //Bu kısımda HTML elementlerini JavaScript ile bağladık
+
+     // Ekleme butonuna tıklama özelliği ekledik.
+    addButton.addEventListener('click', () => {
+      const address = addressInput.value; // Bu kısımda kullanıcıdan adres girişi alınıyor.
+      const type = addressType.value;  // Bu kısımda kullanıcının girdiği adresin türü alınıyo (Ev/iş adresi gibi).
+      if (address) {
+        // Adres girilmişse, ipcRenderer ile 'add-address' mesajı gönderiliyor
+        ipcRenderer.send('add-address', { address, type });
+        addAddressToList(address, type); // Adres listeye ekleniyor
+        addressInput.value = '';
+      }
+    });
+    // Buradaki fonksiyon adresi listeye eklememizi sağlıyor.
+    function addAddressToList(address, type) {
+      const addressItem = document.createElement('div');
+      addressItem.classList.add('address-item'); // Adres öğesi oluşturuluyor ve stil ekleniyor
+      
+      const addressText = document.createElement('span');
+      addressText.classList.add('address-text');
+      addressText.textContent = `${address} (${type === 'home' ? 'Home' : 'Work'})`; // Adres metni oluşturuluyor
+
+      const deleteButton = document.createElement('button');
+      deleteButton.classList.add('delete-button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => { 
+        ipcRenderer.send('delete-address', address); // Adresi silmek için backend'e mesaj gönderdik
+        addressItem.remove();
+      });
+
+      addressItem.appendChild(addressText);
+      addressItem.appendChild(deleteButton);
+      addressList.appendChild(addressItem);
+    }
+
+    ipcRenderer.on('load-addresses', (event, addresses) => {
+       // Gelen her adresi ekrana ekledik
+      addresses.forEach(({ address, type }) => {
+        addAddressToList(address, type);
+      });
+      ipcRenderer.send('update-cart-addresses', addresses);  // Sepetteki adresleri güncellemek için backend'e mesaj gönderdik.
+    });
+
+    // Adresleri backend'den istemek için mesaj gönderdik
+    ipcRenderer.send('request-addresses');
+
+  </script>
+</body>
+</html>

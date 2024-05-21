@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: bisque;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #c62bc9;
+      border-radius: 5px;
+    }
+    .cart-item span {
+      margin: 0 10px;
+    }
+    #total-price {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    #address-selection {
+      margin-top: 20px;
+    }
+    #place-order-button, #clear-cart-button {
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #place-order-button {
+      background-color: green;
+    }
+    #clear-cart-button {
+      background-color: red;
+      margin-left: 10px;
+    }
+    #addresses {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="color: red;">Shopping Cart</h1>
+  <div id="cart-items"></div>
+  <div id="total-price">Total Price: $0.00</div>
+  <div id="address-selection">
+    <label for="addresses">Select Address:</label>
+    <select id="addresses"></select>
+  </div>
+  <button id="place-order-button" onclick="placeOrder()">Place Order</button>
+  <button id="clear-cart-button" onclick="clearCart()">Clear Cart</button>
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    ipcRenderer.on('load-cart', (event, cart) => {
+      const cartItems = document.getElementById('cart-items');
+      const totalPriceElement = document.getElementById('total-price');
+
+      cartItems.innerHTML = '';
+
+      let totalPrice = 0;
+
+      cart.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.classList.add('cart-item');
+
+        const nameElement = document.createElement('span');
+        nameElement.textContent = item.name;
+
+        const priceElement = document.createElement('span');
+        priceElement.textContent = `$${item.price}`;
+
+        const quantityElement = document.createElement('span');
+        quantityElement.textContent = `Quantity: ${item.quantity}`;
+
+        // Elemanları birleştirerek sepet öğesini oluşturduk.
+        itemElement.appendChild(nameElement);
+        itemElement.appendChild(priceElement);
+        itemElement.appendChild(quantityElement);
+        cartItems.appendChild(itemElement);
+
+        // Toplam fiyata sepet öğesinin fiyatını ekledik.
+        totalPrice += item.price * item.quantity;
+      });
+
+      totalPriceElement.textContent = `Total Price: $${totalPrice.toFixed(2)}`;
+    });
+
+    // Main process'ten gelen adresleri yüklediğimiz kısım
+    ipcRenderer.on('load-addresses', (event, addresses) => {
+      const addressesSelect = document.getElementById('addresses');
+      addressesSelect.innerHTML = '';
+
+      addresses.forEach(address => {
+        const option = document.createElement('option');
+        option.value = address.address;
+        option.textContent = `${address.address} (${address.type === 'home' ? 'Home' : 'Work'})`;
+        addressesSelect.appendChild(option);
+      });
+    });
+
+    // Sipariş verme işlevi
+    function placeOrder() {
+      const totalPriceElement = document.getElementById('total-price').textContent;
+      const totalPrice = parseFloat(totalPriceElement.replace('Total Price: $', ''));
+      if (totalPrice === 0) {
+        alert('Please add items to the cart before placing an order.');
+        return;
+      }
+
+      // Seçilen adresi al
+      const addressesSelect = document.getElementById('addresses');
+      const selectedAddress = addressesSelect.value;
+      if (selectedAddress) {
+        // Siparişi main process'e gönderdik.
+        ipcRenderer.send('place-order', selectedAddress);
+        alert('Your order has been placed. Thank you for choosing us.');
+      } else {
+        alert('Please select an address before placing the order.');
+      }
+    }
+
+    // Sepeti temizleme işlevi
+    function clearCart() {
+      ipcRenderer.send('clear-cart');
+    }
+
+    // Sepet temizlendikten sonra geri bildirim yollanıyo bu kısımda
+    ipcRenderer.on('cart-cleared', () => {
+      const cartItems = document.getElementById('cart-items');
+      const totalPriceElement = document.getElementById('total-price');
+
+      // Sepet öğelerini ve toplam fiyatı sıfırlar.
+      cartItems.innerHTML = '';
+      totalPriceElement.textContent = 'Total Price: $0.00';
+
+      alert('All items have been removed from your cart.');
+    });
+
+    // Adresleri talep etme
+    ipcRenderer.send('request-addresses');
+  </script>
+</body>
+</html>
